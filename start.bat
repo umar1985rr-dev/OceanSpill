@@ -75,11 +75,40 @@ echo.
 echo  Starting server on http://localhost:8000 ...
 echo  (Close this window or press Ctrl+C to stop the server)
 echo.
-start "OceanSpill Server" python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000
+start "OceanSpill Server" cmd /k python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000
 
-REM ── Wait for server to be ready, then open browser ──────
-echo Waiting for server to start...
-timeout /t 4 /nobreak >nul
+REM ── Wait for the server to actually be ready ─────────────
+echo.
+echo  Waiting for the server to start...
+echo  (First launch loads the AI model - this can take 30-60 seconds)
+echo.
+set /a tries=0
+
+:check_server
+timeout /t 2 /nobreak >nul
+set /a tries+=1
+
+curl -s -o nul http://localhost:8000/
+if not errorlevel 1 goto server_ready
+
+if %tries% geq 45 (
+    echo.
+    echo  [ERROR] Server did not start within 90 seconds.
+    echo  Look at the "OceanSpill Server" window for the error message.
+    echo  Common causes:
+    echo    - Port 8000 is already in use by another program.
+    echo    - A previous server is still running. Close it first.
+    echo    - The model file is missing from the repository.
+    echo.
+    pause
+    exit /b 1
+)
+
+goto check_server
+
+:server_ready
+echo.
+echo  Server is ready. Opening your browser...
 start http://localhost:8000
 echo.
 echo  Server is running. You can close this window.
