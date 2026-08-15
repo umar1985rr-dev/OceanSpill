@@ -1,19 +1,40 @@
-venv/
-
+# Python
 __pycache__/
-
 *.pyc
+*.pyo
+*.pyd
 
+# Virtual environments
+venv/
+.venv/
+ENV/
+env/
+
+# Environment
 .env
+.env.local
+.env.*.local
 
+# Runtime data
 reports/
-
-*.pdf
-
-uploads/
-
 outputs/
-
+uploads/
 monitoring_state.json
 
-models/fine_tuned/last_checkpoint.pth
+# Database
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/

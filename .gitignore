@@ -3,7 +3,6 @@
 # ============================================
 __pycache__/
 *.py[cod]
-*.pyc
 *.pyo
 *.pyd
 .Python
@@ -20,7 +19,6 @@ venv/
 .venv/
 ENV/
 env/
-.env/
 
 # pip
 .pip/
@@ -43,12 +41,12 @@ secrets.yaml
 secrets.json
 credentials.json
 
-# Runtime config (created by app)
+# Runtime config (created by app at runtime)
 runtime_config.json
 monitoring_state.json
 
 # ============================================
-# Database & Data
+# Database & Data (runtime only)
 # ============================================
 data/
 *.db
@@ -56,18 +54,18 @@ data/
 *.sqlite3
 
 # ============================================
-# Outputs & Reports
+# Outputs & Reports (runtime only)
 # ============================================
 outputs/
+reports/
 *.csv
 *.xlsx
 logs/
 *.log
 
 # ============================================
-# Frontend (built by start.bat, not committed)
+# Frontend (node_modules not committed, dist IS committed)
 # ============================================
-frontend/dist/
 frontend/node_modules/
 frontend/.vite/
 frontend/build/
@@ -99,7 +97,6 @@ Thumbs.db
 Thumbs.db:encryptable
 ehthumbs.db
 ehthumbs.vista.db
-.DS_Store
 desktop.ini
 ._*
 .Spotlight-V100
@@ -113,8 +110,6 @@ $RECYCLE.BIN/
 *.temp
 *.bak
 *.backup
-*.swp
-*.sav
 *.orig
 *.cache
 *.pid
@@ -122,22 +117,23 @@ $RECYCLE.BIN/
 *.pid.lock
 
 # ============================================
-# Model weights (if downloaded separately)
+# Model weights (handled via Git LFS)
 # ============================================
-*.pth
-*.pt
-*.onnx
-*.h5
-*.pkl
-*.model
+# *.pth, *.pt, *.onnx, *.h5, *.pkl, *.model are tracked via LFS
+# See .gitattributes for LFS patterns
 
-# Exclude specific model files (keep in repo)
-# models/fine_tuned/best_model.pth
-# Uncomment below if you don't want to commit the model:
-# models/
+# ============================================
+# Dataset - keep samples/, exclude raw/ and environmental/
+# ============================================
+dataset/raw/
+dataset/environmental/
 
+# ============================================
+# Uploads (runtime)
+# ============================================
+uploads/
 
 # ============================================
 # Docker
 # ============================================
-.dockerignore should be in repo (not this file)
+# .dockerignore IS committed (not ignored)
