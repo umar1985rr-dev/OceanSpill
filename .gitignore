@@ -1,0 +1,143 @@
+# ============================================
+# Python
+# ============================================
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+*.egg
+dist/
+build/
+eggs/
+.eggs/
+*.manifest
+
+# Virtual environments
+venv/
+.venv/
+ENV/
+env/
+.env/
+
+# pip
+.pip/
+.pip-cache/
+pip-log.txt
+pip-delete-this-directory.txt
+.pep8
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ============================================
+# Environment & Configuration
+# ============================================
+.env
+.env.local
+.env.*.local
+secrets.yaml
+secrets.json
+credentials.json
+
+# Runtime config (created by app)
+runtime_config.json
+monitoring_state.json
+
+# ============================================
+# Database & Data
+# ============================================
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# ============================================
+# Outputs & Reports
+# ============================================
+outputs/
+*.csv
+*.xlsx
+logs/
+*.log
+
+# ============================================
+# Frontend (built by start.bat, not committed)
+# ============================================
+frontend/dist/
+frontend/node_modules/
+frontend/.vite/
+frontend/build/
+
+# npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# ============================================
+# IDE & Editors
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.vs/
+*.sublime-workspace
+*.sublime-project
+
+# ============================================
+# OS Files
+# ============================================
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs.vista.db
+.DS_Store
+desktop.ini
+._*
+.Spotlight-V100
+.Trashes
+$RECYCLE.BIN/
+
+# ============================================
+# Temporary Files
+# ============================================
+*.tmp
+*.temp
+*.bak
+*.backup
+*.swp
+*.sav
+*.orig
+*.cache
+*.pid
+*.seed
+*.pid.lock
+
+# ============================================
+# Model weights (if downloaded separately)
+# ============================================
+*.pth
+*.pt
+*.onnx
+*.h5
+*.pkl
+*.model
+
+# Exclude specific model files (keep in repo)
+# models/fine_tuned/best_model.pth
+# Uncomment below if you don't want to commit the model:
+# models/
+
+
+# ============================================
+# Docker
+# ============================================
+.dockerignore should be in repo (not this file)

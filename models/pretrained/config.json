@@ -1,0 +1,8 @@
+{
+    "model": "U-Net",
+    "encoder": "ResNet34",
+    "encoder_weights": "ImageNet",
+    "input_size": 256,
+    "classes": 1,
+    "framework": "segmentation_models_pytorch"
+}

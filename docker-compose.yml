@@ -1,0 +1,73 @@
+# OceanSpill Docker Compose - Free, single-container deployment
+# No Redis, PostgreSQL, or external services required
+
+version: '3.8'
+
+services:
+  oceanspill:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: oceanspill-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      # Application settings
+      - APP_NAME=OceanSpill
+      - MONITOR_ENABLED=true
+      - MONITOR_INTERVAL_SECONDS=300
+      - DETECTION_THRESHOLD=5.0
+      - FEED_SOURCE=simulator
+      - LOG_LEVEL=INFO
+
+      # Security (CHANGE IN PRODUCTION!)
+      - SECRET_KEY=${SECRET_KEY:-oceanspill-secret-key-change-in-production-with-strong-random-string}
+      - ACCESS_TOKEN_EXPIRE_HOURS=24
+      - REFRESH_TOKEN_EXPIRE_DAYS=7
+
+      # Email (optional - for alerts)
+      - EMAIL_ADDRESS=${EMAIL_ADDRESS:-}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD:-}
+      - SMTP_SERVER=${SMTP_SERVER:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+
+      # SMS/Twilio (optional - for alerts)
+      - SMS_PROVIDER=simulated
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID:-}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN:-}
+      - TWILIO_FROM_NUMBER=${TWILIO_FROM_NUMBER:-}
+      - SMS_TO_NUMBERS=${SMS_TO_NUMBERS:-}
+
+      # AIS Providers (optional)
+      - AIS_SOURCE=csv
+      - AISHUB_USERNAME=${AISHUB_USERNAME:-}
+      - AISHUB_PASSWORD=${AISHUB_PASSWORD:-}
+      - MARINETRAFFIC_API_KEY=${MARINETRAFFIC_API_KEY:-}
+
+      # Satellite (Copernicus Data Space)
+      - COPERNICUS_USERNAME=${COPERNICUS_USERNAME:-}
+      - COPERNICUS_PASSWORD=${COPERNICUS_PASSWORD:-}
+
+      # Frontend
+      - FRONTEND_URL=http://localhost:8000
+    volumes:
+      # Persist SQLite database, monitoring state, and reports
+      - oceanspill-data:/app/data
+      - oceanspill-outputs:/app/outputs
+      - oceanspill-reports:/app/reports
+      - ./runtime_config.json:/app/runtime_config.json:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/api/v1/system/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  oceanspill-data:
+    driver: local
+  oceanspill-outputs:
+    driver: local
+  oceanspill-reports:
+    driver: local
