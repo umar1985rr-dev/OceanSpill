@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#0e2a3c"/>
-  <!-- wave bands -->
-  <path d="M10 30c5-4 10-4 15 0s10 4 15 0 10-4 15 0" fill="none" stroke="#0891b2" stroke-width="3.5" stroke-linecap="round" opacity="0.9"/>
-  <path d="M10 40c5-4 10-4 15 0s10 4 15 0 10-4 15 0" fill="none" stroke="#0d9488" stroke-width="3.5" stroke-linecap="round" opacity="0.55"/>
-  <!-- droplet -->
-  <path d="M32 16c6 8 10 13 10 19a10 10 0 1 1-20 0c0-6 4-11 10-19z" fill="#14b8a6"/>
-  <ellipse cx="29" cy="36" rx="4" ry="6" fill="#5eead4" opacity="0.8" transform="rotate(-20 29 36)"/>
-</svg>
