@@ -55,6 +55,77 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
+:: ================================================
+:: Download AI Model (Git LFS)
+:: ================================================
+echo.
+echo [INFO] Checking AI model file...
+if exist "models\fine_tuned\best_model.pth" (
+    :: Check if it's an LFS pointer (small file = pointer)
+    for %%F in ("models\fine_tuned\best_model.pth") do set "MODEL_SIZE=%%~zF"
+    if %MODEL_SIZE% LSS 1000000 (
+        echo [WARN] Model file appears to be a Git LFS pointer (%MODEL_SIZE% bytes)
+        echo [INFO] Downloading actual model from Git LFS...
+
+        :: Try to install git-lfs if not present
+        git lfs version >nul 2>&1
+        if %errorlevel% neq 0 (
+            echo [INFO] Git LFS not found, attempting to install...
+            winget install --id GitHub.GitLFS --silent --accept-source-agreements --accept-package-agreements 2>nul
+            if %errorlevel% neq 0 (
+                choco install git-lfs -y 2>nul
+                if %errorlevel% neq 0 (
+                    scoop install git-lfs 2>nul
+                )
+            )
+            :: Refresh PATH
+            git lfs version >nul 2>&1
+        )
+
+        :: Pull LFS files
+        git lfs pull
+        if %errorlevel% neq 0 (
+            echo [WARN] git lfs pull failed, trying explicit fetch+checkout...
+            git lfs fetch --all
+            git lfs checkout
+        )
+
+        :: Verify download
+        if exist "models\fine_tuned\best_model.pth" (
+            for %%F in ("models\fine_tuned\best_model.pth") do set "NEW_SIZE=%%~zF"
+            if %NEW_SIZE% GTR 1000000 (
+                echo [SUCCESS] Model downloaded (%NEW_SIZE% bytes)
+            ) else (
+                echo [ERROR] Model download failed - file still too small (%NEW_SIZE% bytes)
+                echo.
+                echo Manual fix: Run these commands in terminal:
+                echo   git lfs install
+                echo   git lfs pull
+                pause
+                exit /b 1
+            )
+        ) else (
+            echo [ERROR] Model file not found after LFS pull
+            pause
+            exit /b 1
+        )
+    ) else (
+        echo [OK] Model file exists (%MODEL_SIZE% bytes)
+    )
+) else (
+    echo [WARN] Model file not found, attempting Git LFS pull...
+    git lfs pull
+    if %errorlevel% neq 0 (
+        git lfs fetch --all
+        git lfs checkout
+    )
+    if not exist "models\fine_tuned\best_model.pth" (
+        echo [ERROR] Model file missing after LFS pull
+        pause
+        exit /b 1
+    )
+)
+
 :: Check if frontend is built
 if not exist "frontend\dist\index.html" (
     echo.
