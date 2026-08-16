@@ -70,6 +70,7 @@ if exist "%MODEL_PATH%" (
     for %%F in ("%MODEL_PATH%") do set "MODEL_SIZE=%%~zF"
     if !MODEL_SIZE! GTR 10000000 (
         echo [OK] Model file exists (!MODEL_SIZE! bytes)
+        goto :MODEL_DONE
     ) else (
         echo [WARN] Model file appears invalid/corrupt (!MODEL_SIZE! bytes)
         echo [INFO] Re-downloading from GitHub Release...
@@ -105,6 +106,7 @@ if exist "%MODEL_PATH%" (
     for %%F in ("%MODEL_PATH%") do set "NEW_SIZE=%%~zF"
     if !NEW_SIZE! GTR 10000000 (
         echo [SUCCESS] Model downloaded (!NEW_SIZE! bytes)
+        goto :MODEL_DONE
     ) else (
         echo [ERROR] Model download failed - file too small (!NEW_SIZE! bytes)
         echo.
@@ -119,6 +121,7 @@ if exist "%MODEL_PATH%" (
 )
 
 :MODEL_DONE
+echo [DEBUG] Reached MODEL_DONE, continuing to frontend check...
 
 :: Check if frontend is built
 if not exist "frontend\dist\index.html" (
