@@ -1,6 +1,6 @@
 @echo off
 chcp 65001 >nul 2>&1
-setlocal
+setlocal enabledelayedexpansion
 
 echo.
 echo ================================================
@@ -63,8 +63,8 @@ echo [INFO] Checking AI model file...
 if exist "models\fine_tuned\best_model.pth" (
     :: Check if it's an LFS pointer (small file = pointer)
     for %%F in ("models\fine_tuned\best_model.pth") do set "MODEL_SIZE=%%~zF"
-    if %MODEL_SIZE% LSS 1000000 (
-        echo [WARN] Model file appears to be a Git LFS pointer (%MODEL_SIZE% bytes)
+    if !MODEL_SIZE! LSS 1000000 (
+        echo [WARN] Model file appears to be a Git LFS pointer (!MODEL_SIZE! bytes)
         echo [INFO] Downloading actual model from Git LFS...
 
         :: Try to install git-lfs if not present
@@ -93,10 +93,10 @@ if exist "models\fine_tuned\best_model.pth" (
         :: Verify download
         if exist "models\fine_tuned\best_model.pth" (
             for %%F in ("models\fine_tuned\best_model.pth") do set "NEW_SIZE=%%~zF"
-            if %NEW_SIZE% GTR 1000000 (
-                echo [SUCCESS] Model downloaded (%NEW_SIZE% bytes)
+            if !NEW_SIZE! GTR 1000000 (
+                echo [SUCCESS] Model downloaded (!NEW_SIZE! bytes)
             ) else (
-                echo [ERROR] Model download failed - file still too small (%NEW_SIZE% bytes)
+                echo [ERROR] Model download failed - file still too small (!NEW_SIZE! bytes)
                 echo.
                 echo Manual fix: Run these commands in terminal:
                 echo   git lfs install
@@ -110,7 +110,7 @@ if exist "models\fine_tuned\best_model.pth" (
             exit /b 1
         )
     ) else (
-        echo [OK] Model file exists (%MODEL_SIZE% bytes)
+        echo [OK] Model file exists (!MODEL_SIZE! bytes)
     )
 ) else (
     echo [WARN] Model file not found, attempting Git LFS pull...

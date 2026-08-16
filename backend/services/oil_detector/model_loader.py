@@ -95,7 +95,3 @@ def load_model():
     model.eval()
 
     return model
-
-
-# Backward compatibility
-model = load_model()
