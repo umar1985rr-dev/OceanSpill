@@ -117,10 +117,16 @@ $RECYCLE.BIN/
 *.pid.lock
 
 # ============================================
-# Model weights (handled via Git LFS)
+# Model weights (downloaded from GitHub Releases at runtime)
 # ============================================
-# *.pth, *.pt, *.onnx, *.h5, *.pkl, *.model are tracked via LFS
-# See .gitattributes for LFS patterns
+models/fine_tuned/*.pth
+models/fine_tuned/*.pt
+models/pretrained/*.pth
+models/pretrained/*.pt
+*.onnx
+*.h5
+*.pkl
+*.model
 
 # ============================================
 # Dataset - keep samples/, exclude raw/ and environmental/

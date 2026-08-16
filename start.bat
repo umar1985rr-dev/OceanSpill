@@ -56,75 +56,69 @@ if %errorlevel% neq 0 (
 )
 
 :: ================================================
-:: Download AI Model (Git LFS)
+:: Download AI Model (GitHub Release - Primary, Git LFS - Fallback)
 :: ================================================
 echo.
 echo [INFO] Checking AI model file...
-if exist "models\fine_tuned\best_model.pth" (
-    :: Check if it's an LFS pointer (small file = pointer)
-    for %%F in ("models\fine_tuned\best_model.pth") do set "MODEL_SIZE=%%~zF"
-    if !MODEL_SIZE! LSS 1000000 (
-        echo [WARN] Model file appears to be a Git LFS pointer (!MODEL_SIZE! bytes)
-        echo [INFO] Downloading actual model from Git LFS...
 
-        :: Try to install git-lfs if not present
-        git lfs version >nul 2>&1
-        if %errorlevel% neq 0 (
-            echo [INFO] Git LFS not found, attempting to install...
-            winget install --id GitHub.GitLFS --silent --accept-source-agreements --accept-package-agreements 2>nul
-            if %errorlevel% neq 0 (
-                choco install git-lfs -y 2>nul
-                if %errorlevel% neq 0 (
-                    scoop install git-lfs 2>nul
-                )
-            )
-            :: Refresh PATH
-            git lfs version >nul 2>&1
-        )
+:: GitHub Release download URL
+set "MODEL_URL=https://github.com/umar1985rr-dev/OceanSpill/releases/download/v1.0.0-model/best_model.pth"
+set "MODEL_PATH=models\fine_tuned\best_model.pth"
 
-        :: Pull LFS files
-        git lfs pull
-        if %errorlevel% neq 0 (
-            echo [WARN] git lfs pull failed, trying explicit fetch+checkout...
-            git lfs fetch --all
-            git lfs checkout
-        )
-
-        :: Verify download
-        if exist "models\fine_tuned\best_model.pth" (
-            for %%F in ("models\fine_tuned\best_model.pth") do set "NEW_SIZE=%%~zF"
-            if !NEW_SIZE! GTR 1000000 (
-                echo [SUCCESS] Model downloaded (!NEW_SIZE! bytes)
-            ) else (
-                echo [ERROR] Model download failed - file still too small (!NEW_SIZE! bytes)
-                echo.
-                echo Manual fix: Run these commands in terminal:
-                echo   git lfs install
-                echo   git lfs pull
-                pause
-                exit /b 1
-            )
-        ) else (
-            echo [ERROR] Model file not found after LFS pull
-            pause
-            exit /b 1
-        )
-    ) else (
+if exist "%MODEL_PATH%" (
+    :: Check if it's valid (not LFS pointer, >10MB)
+    for %%F in ("%MODEL_PATH%") do set "MODEL_SIZE=%%~zF"
+    if !MODEL_SIZE! GTR 10000000 (
         echo [OK] Model file exists (!MODEL_SIZE! bytes)
+    ) else (
+        echo [WARN] Model file appears invalid/corrupt (!MODEL_SIZE! bytes)
+        echo [INFO] Re-downloading from GitHub Release...
+        goto :DOWNLOAD_MODEL
     )
 ) else (
-    echo [WARN] Model file not found, attempting Git LFS pull...
+    echo [INFO] Model file not found. Downloading from GitHub Release...
+    goto :DOWNLOAD_MODEL
+)
+
+goto :MODEL_DONE
+
+:DOWNLOAD_MODEL
+:: Create directory if not exist
+if not exist "models\fine_tuned" mkdir "models\fine_tuned"
+
+echo [INFO] Downloading model (~98MB) from GitHub Release...
+echo [INFO] URL: %MODEL_URL%
+
+:: Download with curl (built into Windows 10 1803+)
+curl -L -o "%MODEL_PATH%" "%MODEL_URL%" --progress-bar --retry 3 --retry-delay 5
+if %errorlevel% neq 0 (
+    echo [WARN] curl download failed. Trying Git LFS as fallback...
     git lfs pull
     if %errorlevel% neq 0 (
         git lfs fetch --all
         git lfs checkout
     )
-    if not exist "models\fine_tuned\best_model.pth" (
-        echo [ERROR] Model file missing after LFS pull
+)
+
+:: Verify download
+if exist "%MODEL_PATH%" (
+    for %%F in ("%MODEL_PATH%") do set "NEW_SIZE=%%~zF"
+    if !NEW_SIZE! GTR 10000000 (
+        echo [SUCCESS] Model downloaded (!NEW_SIZE! bytes)
+    ) else (
+        echo [ERROR] Model download failed - file too small (!NEW_SIZE! bytes)
+        echo.
+        echo Manual fix: Download from %MODEL_URL%
         pause
         exit /b 1
     )
+) else (
+    echo [ERROR] Model file not found after download
+    pause
+    exit /b 1
 )
+
+:MODEL_DONE
 
 :: Check if frontend is built
 if not exist "frontend\dist\index.html" (
