@@ -50,7 +50,7 @@ Built for coast guards, port authorities, and marine departments. You don't need
 | **Node.js** | 18+ (only needed for frontend development) |
 | **RAM** | 4 GB minimum, 8 GB recommended |
 | **Disk** | ~2 GB free |
-| **Internet** | Required for live satellite, AIS, and weather APIs |
+| **Internet** | Required for live satellite, AIS, weather APIs, **and model download on first run** |
 
 > The pre-built frontend in `frontend/dist/` is served by the backend. Officials don't need Node.js unless developing the UI.
 
@@ -69,8 +69,11 @@ Built for coast guards, port authorities, and marine departments. You don't need
 That's it. `start.bat` automatically:
 - Creates Python virtual environment
 - Installs all dependencies
+- **Downloads the AI model (~98 MB) from GitHub Releases on first run**
 - Builds the frontend (if needed)
 - Starts the server
+
+> **Model download:** The U-Net model (~98 MB) is **not** bundled in the repo. On first run, `start.bat` downloads it from [GitHub Releases](https://github.com/umar1985rr-dev/OceanSpill/releases/tag/v1.0.0-model). Subsequent runs skip the download — it only happens once.
 
 ### Option 2: Check requirements only
 
@@ -90,6 +93,10 @@ cd OceanSpill
 python -m venv venv
 venv\Scripts\activate
 pip install -r backend\requirements.txt
+
+# Download model (first time only)
+# Download from: https://github.com/umar1985rr-dev/OceanSpill/releases/download/v1.0.0-model/best_model.pth
+# Place at: models/fine_tuned/best_model.pth
 
 # Frontend (development only)
 cd frontend && npm install && npm run build && cd ..
@@ -116,9 +123,10 @@ python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
 1. `start.bat` checks if Python is installed
 2. Creates `venv/` virtual environment
 3. Runs `pip install -r backend/requirements.txt`
-4. Checks if Node.js is installed
-5. Runs `npm install` and `npm run build` in `frontend/`
-6. Starts the server at **http://localhost:8000**
+4. **Downloads the AI model (~98 MB) from GitHub Releases** (first run only)
+5. Checks if Node.js is installed
+6. Runs `npm install` and `npm run build` in `frontend/`
+7. Starts the server at **http://localhost:8000**
 
 ### Subsequent runs
 
@@ -438,7 +446,7 @@ OceanSpill/
 |     └─ src/pages/                  # React pages (development)
 |
 |-- Data & Models --
-|  ├─ models/fine_tuned/best_model.pth  # Trained model (~93 MB, included)
+|  ├─ models/fine_tuned/best_model.pth  # Trained model (~98 MB, downloaded on first run from GitHub Releases)
 |  ├─ dataset/                       # Sample/uploaded datasets
 |  ├─ data/                          # SQLite database (gitignored)
 |  ├─ outputs/                       # Live frames (runtime)
@@ -467,7 +475,8 @@ OceanSpill/
 | **"credentials not configured"** | Sentinel Hub selected but no credentials | Add credentials in Config UI |
 | **"Missing AIS columns: [...]"** | CSV missing required columns | Check format in [AIS CSV format](#ais-csv-file-format) |
 | **Module OFFLINE in System Health** | Data source not configured | Check that section in Configuration page |
-| **Model not found** | Model file missing | Should be at `models/fine_tuned/best_model.pth` |
+| **Model not found** | Model file missing | Should be at `models/fine_tuned/best_model.pth` — `start.bat` auto-downloads it from GitHub Releases on first run |
+| **Model download fails** | Network/permission issue | Manually download from [GitHub Releases](https://github.com/umar1985rr-dev/OceanSpill/releases/tag/v1.0.0-model) and place at `models/fine_tuned/best_model.pth` |
 | **No incidents detected** | Spills below threshold | Lower `detection_threshold` or switch to live feed |
 | **`/config` shows JSON** | You're at API endpoint | Navigate to Config page in sidebar |
 
