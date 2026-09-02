@@ -1,0 +1,44 @@
+# OceanSpill backend dependencies
+# NOTE: torch/torchvision/opencv are already installed in the local venv.
+# For lean server installs, prefer CPU wheels, e.g.:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+
+# Web framework
+fastapi
+uvicorn[standard]
+brotli-asgi
+python-multipart
+pydantic
+
+# Data / numerics
+numpy
+pandas
+requests
+
+# AI / computer vision
+torch
+torchvision
+segmentation-models-pytorch
+opencv-python-headless
+albumentations
+tqdm
+
+# Reporting / mapping
+reportlab
+folium
+matplotlib
+
+# Monitoring scheduler
+apscheduler
+
+# Alerts
+twilio
+
+# Database
+sqlalchemy
+
+# Authentication & Security
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt
+email-validator

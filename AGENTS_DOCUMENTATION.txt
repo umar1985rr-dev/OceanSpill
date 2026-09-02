@@ -1,0 +1,221 @@
+OceanSpill Agentic AI Features — Complete Architecture
+=====================================================
+
+1. AGENT CORE (backend/agents/core.py)
+--------------------------------------
+
+Objective: Base framework for all agents — observe → plan → act loop
+
+How it works:
+- Every agent inherits from BaseAgent class
+- Each agent has: observe() → checks state, plan() → decides action, act() → executes
+- Uses SQLite for agent memory/persistence (no Redis)
+- Async task queue built with Python asyncio and queue.Queue
+- Each agent runs in a background thread via APScheduler (already in project)
+
+Tech used: Python asyncio, threading, SQLite, APScheduler (existing)
+
+Key methods:
+class BaseAgent:
+    def observe(self)      # Check conditions/triggers
+    def plan(self)         # Decide next action
+    def act(self)          # Execute action
+    def remember(self, mem) # Store to agent memory
+    def forget(self)        # Clear old memory
+
+
+2. RESPONSE AGENT (backend/agents/response.py)
+----------------------------------------------
+
+Objective: Autonomous full incident response pipeline — no manual trigger needed
+
+How it works:
+- Listens to monitoring loop (existing MonitoringService)
+- When spill detected → automatically triggers: AIS ranking → drift prediction →
+  impact analysis → cleanup recommendation → PDF report → alert dispatch
+- Orchestrates parallel execution where possible
+- Logs every step to agent memory for audit trail
+- Handles failures gracefully — retries failed steps, skips non-critical ones
+
+Tech used: Existing services (AIS, drift, impact, cleanup, report), SQLite for logs
+
+Execution flow:
+Spill Detected
+    ↓
+Response Agent receives event
+    ↓
+┌─────────────────────────────────────────┐
+│ Step 1: AIS Ranking (parallel)          │
+│ Step 2: Drift Prediction (parallel)     │
+│ Step 3: Impact Analysis (after drift)   │
+│ Step 4: Cleanup Recommendation          │
+│ Step 5: Generate PDF Report             │
+│ Step 6: Dispatch Alerts                 │
+└─────────────────────────────────────────┘
+    ↓
+Log to agent memory → Incident resolved
+
+
+3. ALERT AGENT (backend/agents/alerts.py)
+-----------------------------------------
+
+Objective: Intelligent alert routing — right message, right person, right time
+
+How it works:
+- Reads incident severity and risk level from detection
+- Routes alerts based on rules:
+  - LOW risk → Dashboard only (no SMS/email)
+  - MEDIUM risk → Dashboard + Email to on-duty operator
+  - HIGH risk → Dashboard + Email + SMS to all contacts
+- Tracks recipient acknowledgment — if no response in 15min, escalates
+- Respects quiet hours (configurable, e.g., no SMS 10pm-7am unless HIGH risk)
+- Cooldown logic — don't spam same contact for similar incidents within 1 hour
+
+Tech used: Existing alert service, SQLite for alert history/ack tracking
+
+Rules engine:
+RULES = {
+    "LOW": ["dashboard"],
+    "MEDIUM": ["dashboard", "email:on_duty"],
+    "HIGH": ["dashboard", "email:all", "sms:all"],
+    "CRITICAL": ["dashboard", "email:all", "sms:all", "escalate_if_no_ack:15min"]
+}
+
+
+4. HEALTH AGENT (backend/agents/health.py)
+------------------------------------------
+
+Objective: Self-healing — detect failures, auto-recover, never crash
+
+How it works:
+- Runs health check every 5 minutes (configurable)
+- Detects failures in:
+  - Satellite feed → Surface a clear error if unconfigured/failing
+  - Weather API → If Open-Meteo fails, use cached/last known data
+  - AIS provider → Fallback to CSV if live APIs fail
+  - Database → SQLite auto-recovery (WAL mode handles corruption)
+  - Disk space → Alert if outputs/ or reports/ exceed threshold
+- Auto-restarts failed services without crashing the whole app
+- Logs every health issue + recovery action to agent memory
+
+Tech used: Existing health check service, psutil for system metrics (optional)
+
+Self-healing actions:
+| Failure          | Auto-Recovery Action                        |
+|------------------|---------------------------------------------|
+| Satellite timeout | Surface a clear "feed not configured" error |
+| Open-Meteo error  | Use cached weather + warn                  |
+| AIS API down      | Fallback to CSV upload                     |
+| Disk full         | Auto-delete old reports (keep last 50)     |
+| Service crash     | Restart via APScheduler                    |
+
+
+5. PREDICTIVE AGENT (backend/agents/predictive.py)
+--------------------------------------------------
+
+Objective: Learn from history → predict high-risk times/locations
+
+How it works:
+- Analyzes past incidents from SQLite database
+- Tracks patterns:
+  - Temporal — Which hours/days have more spills?
+  - Spatial — Which coordinates have recurring spills?
+  - Weather — Which wind/current conditions correlate with spills?
+- Generates risk score for next 24-48 hours
+- Adjusts monitoring interval dynamically
+
+Tech used: SQLite (existing incident data), simple statistical analysis
+
+
+6. QUERY AGENT (backend/agents/query.py) — Optional
+---------------------------------------------------
+
+Objective: Natural language interface — ask questions about data in plain English
+
+How it works:
+- Receives user question via API
+- Parses intent: "What spills happened near Chennai last month?"
+- Routes to correct service
+- Returns formatted text response
+- Optional: Uses lightweight LLM for complex queries
+
+Tech used: FastAPI (existing), optional llama.cpp or ollama API
+
+Example queries:
+- "Show me all HIGH risk incidents this week"
+- "Which vessels were near the last spill?"
+- "What was the cleanup cost for the biggest spill?"
+- "Predict drift path for coordinates 13.08, 80.27"
+
+
+7. AGENT MODELS (backend/models/agent.py)
+-----------------------------------------
+
+Objective: SQLite tables for agent state and memory
+
+Tables created:
+- agent_memory: id, agent_name, event_type, event_data (JSON), created_at
+- agent_tasks: id, agent_name, task_type, status, priority, retry_count, result
+- agent_logs: id, agent_name, action, details, success, created_at
+- alert_acks: id, incident_id, recipient, channel, sent_at, acknowledged_at
+
+
+8. AGENT API (backend/api/agents.py)
+------------------------------------
+
+Objective: Control and monitor all agents from UI/API
+
+Endpoints:
+- GET /api/v1/agents — List all agents and their status
+- GET /api/v1/agents/{name} — Detailed status of specific agent
+- GET /api/v1/agents/{name}/logs — Recent actions
+- POST /api/v1/agents/{name}/stop — Stop an agent
+- POST /api/v1/agents/{name}/start — Start an agent
+- POST /api/v1/agents/{name}/config — Update agent config
+- POST /api/v1/query — Natural language query
+
+
+9. AGENT CONFIG (backend/agents/config.py)
+------------------------------------------
+
+Objective: Centralized configuration for all agents
+
+Settings:
+RESPONSE_AGENT: enabled, parallel_execution, timeout, retry_failed_steps, max_retries
+ALERT_AGENT: quiet_hours_start/end, ack_timeout_minutes, cooldown_minutes
+HEALTH_AGENT: check_interval_seconds, auto_recovery, disk_threshold_gb
+PREDICTIVE_AGENT: analysis_window_days, risk_threshold_high/low
+
+
+10. AGENT SERVICE BOOTSTRAP (backend/agents/__init__.py)
+--------------------------------------------------------
+
+Objective: Initialize and start all agents on app startup
+
+Integration with existing main.py lifespan
+
+
+File Summary Table
+==================
+
+| File                      | Function                          | Objective                          |
+|---------------------------|-----------------------------------|------------------------------------|
+| backend/agents/core.py    | Base agent class, memory, queue   | Reusable framework for all agents  |
+| backend/agents/response.py| Incident response orchestrator    | Auto-trigger full pipeline         |
+| backend/agents/alerts.py  | Smart alert routing + escalation  | Right alert, right person, time    |
+| backend/agents/health.py  | Health checks + auto-recovery     | Self-healing, zero-downtime        |
+| backend/agents/predictive.py| Pattern analysis + intervals    | Predict risk, optimize monitoring |
+| backend/agents/query.py   | Natural language interface        | Ask questions in plain English     |
+| backend/models/agent.py   | SQLAlchemy models                 | Persistent agent state             |
+| backend/api/agents.py     | Agent control + query endpoints   | UI/API control panel               |
+| backend/agents/config.py  | Agent configuration               | Centralized config                 |
+| backend/agents/__init__.py| Agent bootstrap + lifecycle       | Auto-start on app launch           |
+
+
+Dependencies Added
+==================
+
+backend/requirements.txt:
+- psutil (optional, for Health Agent system metrics)
+
+No new external services required — Uses existing SQLite + APScheduler + services.

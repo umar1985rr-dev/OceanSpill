@@ -1,0 +1,169 @@
+# ============================================
+# Python
+# ============================================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+*.egg
+# `dist/` below would also match frontend/dist; the negation keeps the
+# built React bundle committable so end users never need Node/npm
+# (fastapi serves frontend/dist at runtime — see start.bat).
+dist/
+!frontend/dist/
+build/
+eggs/
+.eggs/
+*.manifest
+
+# Virtual environments
+venv/
+.venv/
+ENV/
+env/
+
+# pip
+.pip/
+.pip-cache/
+pip-log.txt
+pip-delete-this-directory.txt
+.pep8
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ============================================
+# Environment & Configuration
+# ============================================
+.env
+.env.local
+.env.*.local
+secrets.yaml
+secrets.json
+credentials.json
+
+# Runtime config (created by app at runtime)
+runtime_config.json
+monitoring_state.json
+
+# ============================================
+# Database & Data (runtime only)
+# ============================================
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# ============================================
+# Outputs & Reports (runtime only)
+# ============================================
+outputs/
+reports/
+*.csv
+*.xlsx
+logs/
+*.log
+
+# ============================================
+# Frontend (node_modules not committed, dist IS committed)
+# ============================================
+frontend/node_modules/
+frontend/.vite/
+frontend/build/
+
+# npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# ============================================
+# IDE & Editors
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.vs/
+*.sublime-workspace
+*.sublime-project
+
+# ============================================
+# OS Files
+# ============================================
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs.vista.db
+desktop.ini
+._*
+.Spotlight-V100
+.Trashes
+$RECYCLE.BIN/
+
+# ============================================
+# Temporary Files
+# ============================================
+*.tmp
+*.temp
+*.bak
+*.backup
+*.orig
+*.cache
+*.pid
+*.seed
+*.pid.lock
+
+# ============================================
+# Model weights (downloaded from GitHub Releases at runtime)
+# ============================================
+models/fine_tuned/*.pth
+models/fine_tuned/*.pt
+models/pretrained/*.pth
+models/pretrained/*.pt
+*.onnx
+*.h5
+*.pkl
+*.model
+
+# ============================================
+# Dataset - exclude raw/, samples/, and environmental/
+# ============================================
+dataset/raw/
+dataset/environmental/
+dataset/samples/
+
+# ============================================
+# Personal files (not part of the project)
+# ============================================
+oceandata/
+*.docx
+*.pdf
+start copy.bat
+newpaper2.docx
+new paper.docx
+vijipaper15.pdf
+ocean spill ai 2.docx
+paper/OceanSpill_IEEE.tex
+paper/OceanSpill_paper_readable.md
+
+# ============================================
+# Evaluation results (reproducible, not committed)
+# ============================================
+evaluation_results/
+
+# ============================================
+# Uploads (runtime)
+# ============================================
+uploads/
+
+# ============================================
+# Docker
+# ============================================
+# .dockerignore IS committed (not ignored)

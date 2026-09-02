@@ -1,0 +1,68 @@
+# OceanSpill .dockerignore - Keep build context minimal for GitHub/docker build
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Git
+.git/
+.gitignore
+
+# Frontend build is done in Docker; keep source available so dist can be generated.
+# Do not exclude frontend source or package files from the build context.
+frontend/node_modules/
+
+# Keep project assets required at runtime.
+# Models and datasets are intentionally copied into the image.
+# Large model files are allowed in the build context if present.
+
+# Data directories (mounted as volumes)
+data/
+outputs/
+reports/
+
+# Config files with secrets
+.env
+*.env
+runtime_config.json
+monitoring_state.json
+
+# Logs
+*.log
+
+# Documentation
+*.md
+docs/
+
+# Tests
+tests/
+*.test.*
+
+# Jupyter
+*.ipynb
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
